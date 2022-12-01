@@ -1,0 +1,287 @@
+<style>
+        .boton{
+                height: 30px;
+                width:100px;
+                background-color:green;
+                border-color:rgb(12, 189, 12);
+                color:aliceblue;
+        }
+</style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Zelda-Proyecto Final IA</title>
+        <link rel="icon" href="personajes/zelda/zelda_inicio.png">
+</head>
+<body>
+        <div id="matriz"></div>
+        <br><br>
+        <div style="margin-left: 40px;">
+                <button class="boton" value="pasoApaso" id="pasoApaso" name="pasoApaso">Paso a paso</button>
+                <button class="boton" value="aUnPaso" id="aUnPaso" name="aUnPaso">A un paso</button>
+                <button class="boton" value="reiniciar" id="reiniciar" name="reiniciar">Reiniciar</button>
+        </div>
+        
+</body>
+</html>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script >
+        
+        var botonPasoApaso = document.getElementById('pasoApaso'),
+        botonAUnApaso = document.getElementById('aUnPaso'),
+        botonReiniciar = document.getElementById('reiniciar'),
+        div = document.getElementById('matriz');
+
+        let imagenes=["personajes/cuadroBlanco.png","personajes/camino.png","personajes/fuegoVillano.png",
+            "personajes/ganar.png","personajes/zeldaVillano.png",
+           "personajes/zelda/zelda_inicio.png","personajes/zelda/zelda_espaldas.png",
+           "personajes/zelda/zelda_derecha.png","personajes/zelda/zelda_izquierda.png"];   
+        let matriz = [
+                        ["personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png", "personajes/ganar.png"],
+                        ["personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png"],
+                        ["personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png"],
+                        ["personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png"],
+                        ["personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png"],
+                        ["personajes/zelda/zelda_inicio.png", "personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png", "personajes/cuadroBlanco.png"]
+                    ];
+        let tamano = (matriz.length*matriz.length);
+        var conteoVueltas=0;
+        var contadorSig=0;
+        var intento=0;
+        var modo='ninguno', voltearVillano='nada';
+        var paso;
+        var modoPasoAPaso='ninguno';
+        var villano =Math.floor(Math.random()*(17-12+1))+12;
+        var movimientoZelda,movimientoZeldaDerecha,movimientoZeldaArriba,movimientoZeldaAbajo,movimientoZeldaIzquierda;
+        var flamaDerecha,flamaIzquierda,flamaArriba,flamaAbajo;
+        var caminoVisto,caminoMostrado=0,pasosZelda=30,colocacion=0,ganar,mostrarVillano;
+        for(var i=0; i<tamano; i++){
+                if(i==matriz.length || i==(matriz.length*(conteoVueltas+1))){
+                        contadorSig=0;
+                        conteoVueltas++;
+                }
+                if(contadorSig==0){
+                                espacio = document.createElement("br");
+                                div.appendChild(espacio);
+                }
+                imagenDos = document.createElement("img");
+                imagenDos.setAttribute("src", matriz[conteoVueltas][contadorSig]);
+                imagenDos.setAttribute("style", "width:62px; height:62px; position:relative; left:12px; top:12px;");
+                imagenDos.setAttribute("id", "imagen"+i);
+                div.appendChild(imagenDos);           
+                contadorSig++;
+        }
+        botonPasoApaso.onclick = function(){
+                if(modo=='ninguno' || modo=='pasoAPaso'){
+                        modo='pasoAPaso';
+                        if(intento==0){
+                                if(modoPasoAPaso=='ninguno'){
+                                
+                                        movimientoZeldaDerecha = document.getElementById('imagen'+(pasosZelda+1));
+                                        movimientoZeldaIzquierda = document.getElementById('imagen'+(pasosZelda-1));
+                                        movimientoZeldaArriba = document.getElementById('imagen'+(pasosZelda-6));
+                                        movimientoZeldaAbajo = document.getElementById('imagen'+(pasosZelda+6));
+                                        
+                                        if((villano-1)==(pasosZelda-6) && (villano+6)==(pasosZelda+1)){
+                                                colocacion=5;
+                                                caminoMostrado=0;
+                                                mover(colocacion,(pasosZelda+6),(pasosZelda),caminoMostrado);
+                                                pasosZelda+=6;
+                                                paso='paso_porFuegos';
+                                        }else if((movimientoZeldaDerecha.src.substr(70,27)=='personajes/cuadroBlanco.png' && movimientoZeldaArriba.src.substr(70,27)=='personajes/cuadroBlanco.png') 
+                                                && (paso=='paso_porFuegos')){
+                                                colocacion=6;
+                                                caminoMostrado=1;
+                                                mover(colocacion,(pasosZelda+1),(pasosZelda),caminoMostrado);
+                                                pasosZelda+=1;
+                                                paso='';
+                                        }else if(movimientoZeldaDerecha.src.substr(70,27)=='personajes/cuadroBlanco.png' && ((villano+6)==(pasosZelda-6) || (villano+1)==(pasosZelda-6))){
+                                                colocacion=7;
+                                                caminoMostrado=1;
+                                                mover(colocacion,(pasosZelda+1),(pasosZelda),caminoMostrado);
+                                                pasosZelda+=1;
+                                        }else if((villano+6)==(pasosZelda+1) && movimientoZeldaArriba.src.substr(70,27)=='personajes/cuadroBlanco.png' ){
+                                                colocacion=6;
+                                                caminoMostrado=1;
+                                                mover(colocacion,(pasosZelda-6),(pasosZelda),caminoMostrado);
+                                                pasosZelda-=6;
+                                        }else {
+                                                colocacion=6;
+                                                caminoMostrado=1;
+                                                mover(colocacion,(pasosZelda-6),(pasosZelda),caminoMostrado);
+                                                pasosZelda-=6;   
+                                        }
+
+                                        if((pasosZelda-6)<0){
+                                                modoPasoAPaso='pasoAPaso';
+                                        }
+                                }
+                                if(modoPasoAPaso=='pasoAPaso'){
+                                                var entro=0;
+                                                if(pasosZelda==4){
+                                                        voltearVillano='mostrar';
+                                                        intento=1;
+                                                        modoPasoAPaso='ninguno';
+                                                        paso='';
+                                                        ganar='no';
+                                                        colocacion=5;
+                                                        caminoMostrado=1;
+                                                        entro=1;
+                                                        villanoAdentro('pasoApaso','mostrar');
+                                                        mover(colocacion,(pasosZelda+1),(pasosZelda),caminoMostrado);
+                                                        swal("Bienn!", "Llego a la meta!","success");
+                                                }else{
+                                                        colocacion=7;
+                                                        entro=1;
+                                                        caminoMostrado=1;
+                                                        mover(colocacion,(pasosZelda+(entro)),(pasosZelda),caminoMostrado);
+                                                }
+                                                pasosZelda+=1;
+
+                                }
+                        }else{
+                                reiniciar();
+                                swal("Oops!", "Se reiniciara por doble click!");
+                        }
+                        
+                }else{
+                        swal("Oops!", "Reinicia para entrar a Paso a Paso!","error");
+                }
+                
+        }
+        botonAUnApaso.onclick = function(){
+                if(modo=='ninguno' || modo=='aUnPaso'){
+                        modo='aUnPaso';
+                        intento++;
+                        if(intento==1){
+
+                                villanoAdentro(modo);
+                                var paso;
+                                do{
+                                        ganar='si';
+                
+                                        movimientoZeldaDerecha = document.getElementById('imagen'+(pasosZelda+1));
+                                        movimientoZeldaIzquierda = document.getElementById('imagen'+(pasosZelda-1));
+                                        movimientoZeldaArriba = document.getElementById('imagen'+(pasosZelda-6));
+                                        movimientoZeldaAbajo = document.getElementById('imagen'+(pasosZelda+6));
+                                        
+                                        if(movimientoZeldaDerecha.src.substr(70,27)=='personajes/fuegoVillano.png' && movimientoZeldaArriba.src.substr(70,27)=='personajes/fuegoVillano.png'){
+                                                colocacion=5;
+                                                caminoMostrado=0;
+                                                mover(colocacion,(pasosZelda+6),(pasosZelda),caminoMostrado);
+                                                pasosZelda+=6;
+                                                paso='paso_porFuegos';
+                                        }else if((movimientoZeldaDerecha.src.substr(70,27)=='personajes/cuadroBlanco.png' && movimientoZeldaArriba.src.substr(70,27)=='personajes/cuadroBlanco.png') 
+                                                && (paso=='paso_porFuegos')){
+                                                colocacion=6;
+                                                caminoMostrado=1;
+                                                mover(colocacion,(pasosZelda+1),(pasosZelda),caminoMostrado);
+                                                pasosZelda+=1;
+                                        }else if(movimientoZeldaDerecha.src.substr(70,27)=='personajes/cuadroBlanco.png' && movimientoZeldaArriba.src.substr(70,27)=='personajes/fuegoVillano.png' ){
+                                                colocacion=7;
+                                                caminoMostrado=1;
+                                                mover(colocacion,(pasosZelda+1),(pasosZelda),caminoMostrado);
+                                                pasosZelda+=1;
+                                        }else if(movimientoZeldaDerecha.src.substr(70,27)=='personajes/fuegoVillano.png' && movimientoZeldaArriba.src.substr(70,27)=='personajes/cuadroBlanco.png' ){
+                                                colocacion=6;
+                                                caminoMostrado=1;
+                                                mover(colocacion,(pasosZelda-6),(pasosZelda),caminoMostrado);
+                                                pasosZelda-=6;
+                                        }else if(movimientoZeldaDerecha.src.substr(70,27)=='personajes/cuadroBlanco.png' && movimientoZeldaArriba.src.substr(70,27)=='personajes/cuadroBlanco.png' ){
+                                                colocacion=6;
+                                                caminoMostrado=1;
+                                                mover(colocacion,(pasosZelda-6),(pasosZelda),caminoMostrado);
+                                                pasosZelda-=6;
+                                        }
+                                        
+                                        
+                                        if((pasosZelda-6)<0){
+                                                var entro=0;
+                                                if(pasosZelda==0){
+                                                        entro=5;
+                                                }else if(pasosZelda==1){
+                                                        entro=3;
+                                                }else if(pasosZelda==2){
+                                                        entro=1;
+                                                }else if(pasosZelda==3){
+                                                        entro=(-1);
+                                                }else if(pasosZelda==4){
+                                                        entro=(-2);
+                                                }
+                                                swal("Bienn!", "Lllego a la meta!","success");
+                                                for(var i=0; i<(pasosZelda+(entro)); i++){
+                                                        colocacion=5;
+                                                        caminoMostrado=1;
+                                                        mover(colocacion,(pasosZelda+(pasosZelda+(entro))),(pasosZelda+i),caminoMostrado);
+                                                }
+                                                
+                                                paso='';
+                                                ganar='no';
+                                        }
+                
+                                        
+                                }while(ganar!='no');
+                        }else if(intento==2){
+                                reiniciar();
+                                swal("Oops!", "Se reiniciara por doble click!");
+                        }
+                }else{
+                        swal("Oops!", "Reinicia o sigue Paso a Paso!","error");
+                }
+                
+
+        }
+        botonReiniciar.onclick = function(){
+                reiniciar();
+        }
+        function reiniciar(){
+                contadorSig=0;
+                conteoVueltas=0;
+                pasosZelda=30;
+                colocacion=0;
+                intento=0;
+                ganar='si';
+                modo='ninguno';
+                villano=Math.floor(Math.random()*(17-12+1))+12;
+                for(var i=0; i<tamano; i++){
+                        if(i==matriz.length || i==(matriz.length*(conteoVueltas+1))){
+                                contadorSig=0;
+                                conteoVueltas++;
+                        }
+                        var num2 = document.getElementById('imagen'+(i));
+                        num2.src=matriz[conteoVueltas][contadorSig];
+                        contadorSig++;
+                }
+        }
+        function villanoAdentro(lugar, mostrar){
+
+                if(lugar=='pasoApaso' && mostrar=='mostrar'){
+                        movimientoVillano(villano);
+                }else if(lugar=='aUnPaso'){
+                        villano=Math.floor(Math.random()*(17-12+1))+12;
+                        movimientoVillano(villano);
+                }
+        }
+        function movimientoVillano(datoVillano){
+                mostrarVillano = document.getElementById('imagen'+(datoVillano));
+                mostrarVillano.src=imagenes[4];
+                flamaDerecha = document.getElementById('imagen'+(datoVillano+1));
+                flamaDerecha.src=imagenes[2];
+                flamaIzquierda = document.getElementById('imagen'+(datoVillano-1));
+                flamaIzquierda.src=imagenes[2];
+                flamaArriba = document.getElementById('imagen'+(datoVillano-6));
+                flamaArriba.src=imagenes[2];
+                flamaAbajo = document.getElementById('imagen'+(datoVillano+6));
+                flamaAbajo.src=imagenes[2];
+
+        }
+        function mover(movimiento,avance,camino,caminoDestapado){
+                movimientoZelda = document.getElementById('imagen'+(avance));
+                movimientoZelda.src=imagenes[movimiento];
+                caminoVisto = document.getElementById('imagen'+(camino));
+                caminoVisto.src=imagenes[caminoDestapado];
+        }
+</script>
